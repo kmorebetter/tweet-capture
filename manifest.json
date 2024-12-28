@@ -21,19 +21,14 @@
       "128": "icons/icon128.png"
     }
   },
+  "content_scripts": [
+    {
+      "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
+      "js": ["scripts/contentScript.js"],
+      "run_at": "document_end"
+    }
+  ],
   "background": {
     "service_worker": "scripts/background.js"
-  },
-  "content_scripts": [{
-    "matches": ["https://twitter.com/*", "https://x.com/*"],
-    "js": ["scripts/contentScript.js"]
-  }],
-  "commands": {
-    "_execute_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+S",
-        "mac": "Command+Shift+S"
-      }
-    }
   }
 }
