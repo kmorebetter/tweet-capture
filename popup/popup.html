@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tweet Capture</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Tweet Capture</h1>
+    <div class="options">
+      <label>
+        <input type="checkbox" id="includeMetrics" checked>
+        Include engagement metrics
+      </label>
+    </div>
+    <div class="buttons">
+      <button id="captureBtn">Capture Tweet</button>
+      <button id="copyBtn" disabled>Copy to Clipboard</button>
+    </div>
+    <div id="preview" class="preview hidden">
+      <img id="previewImage" src="" alt="Captured tweet">
+    </div>
+    <div id="error" class="error hidden">
+      Please navigate to a tweet to capture it
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
