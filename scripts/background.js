@@ -1,8 +1,9 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('Background script received message:', request);
   if (request.action === 'captureArea') {
     chrome.tabs.captureVisibleTab(null, { format: 'png' }, dataUrl => {
-      // Create a canvas to crop the screenshot
       const img = new Image();
+      
       img.onload = () => {
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -18,9 +19,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
         sendResponse({ imageData: canvas.toDataURL() });
       };
+
       img.src = dataUrl;
     });
-    return true;
+    return true; // Will respond asynchronously
   }
 });
 
