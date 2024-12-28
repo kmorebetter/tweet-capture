@@ -37,12 +37,15 @@ async function captureTweet(includeMetrics = true) {
     container.appendChild(tweetClone);
     document.body.appendChild(container);
 
-    console.log('About to capture with html2canvas...'); // Debug log
+    console.log('About to capture with html2canvas...'); 
     const canvas = await html2canvas(container, {
-      scale: 2,
-      backgroundColor: null,
-      logging: true // Enable html2canvas logging
-    });
+    scale: 2,
+    backgroundColor: null,
+    logging: true,
+    useCORS: true,
+    allowTaint: true,
+    foreignObjectRendering: false
+});
 
     document.body.removeChild(container);
     console.log('Capture complete!'); // Debug log
