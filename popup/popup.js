@@ -2,46 +2,67 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Popup loaded');
 
   const captureBtn = document.getElementById('captureBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const preview = document.getElementById('preview');
+  const previewImage = document.getElementById('previewImage');
+  const errorDiv = document.getElementById('error');
+  const includeMetrics = document.getElementById('includeMetrics');
+
+  let currentImage = null;
   
   captureBtn.addEventListener('click', async () => {
     console.log('Capture button clicked');
     
     try {
-      // Get current tab
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       console.log('Current tab URL:', tab.url);
       
-      // Check if we're on Twitter/X
       if (!tab.url.includes('twitter.com') && !tab.url.includes('x.com')) {
         console.log('Not on Twitter/X');
-        alert('Please navigate to a tweet on Twitter/X');
+        errorDiv.classList.remove('hidden');
+        preview.classList.add('hidden');
         return;
       }
 
-      // Inject content script if needed
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['scripts/contentScript.js']
-        });
-        console.log('Content script injected');
-      } catch (e) {
-        console.log('Content script already exists');
-      }
-
-      // Try to send a message to content script
-      console.log('Sending test message...');
+      // Try to capture the tweet
+      console.log('Sending capture request...');
       const response = await chrome.tabs.sendMessage(tab.id, {
-        action: 'test',
-        message: 'Hello from popup!'
+        action: 'captureTweet',
+        includeMetrics: includeMetrics.checked
       });
       
-      console.log('Response from content script:', response);
-      alert('Message sent successfully!');
+      console.log('Response received:', response);
+
+      if (response && response.error) {
+        throw new Error(response.error);
+      }
+
+      if (response && response.imageData) {
+        currentImage = response.imageData;
+        previewImage.src = currentImage;
+        preview.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+        copyBtn.disabled = false;
+      }
 
     } catch (err) {
       console.error('Error:', err);
-      alert('Error: ' + err.message);
+      errorDiv.textContent = err.message || 'Failed to capture tweet';
+      errorDiv.classList.remove('hidden');
+      preview.classList.add('hidden');
+    }
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    try {
+      const response = await fetch(currentImage);
+      const blob = await response.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]);
+    } catch (err) {
+      errorDiv.textContent = 'Failed to copy image';
+      errorDiv.classList.remove('hidden');
     }
   });
 });
