@@ -1,75 +1,43 @@
 async function captureTweet(includeMetrics = true) {
-  console.log('Attempting to capture tweet...'); // Debug log
+  console.log('Attempting to capture tweet...');
   try {
-    // Try both old and new selectors
-    const tweetArticle = document.querySelector('article[data-testid="tweet"], article[data-testid="tweetDetail"]');
-    console.log('Tweet element found:', !!tweetArticle); // Debug log
+    const tweetArticle = document.querySelector('article[data-testid="tweet"]');
+    console.log('Tweet article found:', !!tweetArticle);
     
     if (!tweetArticle) {
       throw new Error('No tweet found on this page');
     }
 
-    // Log the structure
-    console.log('Tweet structure:', {
-      hasMetrics: !!tweetArticle.querySelector('[role="group"]'),
-      tweetText: tweetArticle.textContent.slice(0, 50) + '...'
+    // Get the tweet's position and size
+    const rect = tweetArticle.getBoundingClientRect();
+    
+    // Scroll the tweet into view if needed
+    tweetArticle.scrollIntoView({ behavior: 'instant', block: 'center' });
+    
+    // Wait for any animations to complete
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Send dimensions to background script for capture
+    const response = await chrome.runtime.sendMessage({
+      action: 'captureArea',
+      area: {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height
+      }
     });
 
-    // Rest of the function...
-    const tweetClone = tweetArticle.cloneNode(true);
-
-    if (!includeMetrics) {
-      const metrics = tweetClone.querySelector('[role="group"]');
-      if (metrics) metrics.remove();
-    }
-
-    const container = document.createElement('div');
-    container.style.cssText = `
-      position: fixed;
-      top: -9999px;
-      left: -9999px;
-      width: 550px;
-      background: ${getComputedStyle(document.body).backgroundColor};
-      padding: 16px;
-      border-radius: 16px;
-      z-index: -1;
-    `;
-    container.appendChild(tweetClone);
-    document.body.appendChild(container);
-
-    console.log('About to capture with html2canvas...'); 
-    const canvas = await html2canvas(container, {
-    scale: 2,
-    backgroundColor: null,
-    logging: true,
-    useCORS: true,
-    allowTaint: true,
-    foreignObjectRendering: false
-});
-
-    document.body.removeChild(container);
-    console.log('Capture complete!'); // Debug log
-
-    return {
-      imageData: canvas.toDataURL('image/png')
-    };
+    return response;
   } catch (error) {
-    console.error('Capture error:', error); // Debug log
+    console.error('Capture error:', error);
     return { error: error.message };
   }
 }
 
-// Add debug logging to message listener
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Received message:', request); // Debug log
   if (request.action === 'captureTweet') {
-    captureTweet(request.includeMetrics).then(response => {
-      console.log('Sending response:', response); // Debug log
-      sendResponse(response);
-    });
+    captureTweet(request.includeMetrics).then(sendResponse);
     return true;
   }
 });
-
-// Log when content script loads
-console.log('Tweet Capture content script loaded!');
