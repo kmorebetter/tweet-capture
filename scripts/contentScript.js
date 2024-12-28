@@ -17,27 +17,32 @@ async function captureTweet(includeMetrics = true) {
     // Wait for any animations to complete
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Send dimensions to background script for capture
-    const response = await chrome.runtime.sendMessage({
-      action: 'captureArea',
-      area: {
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height
-      }
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage({
+        action: 'captureArea',
+        area: {
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height
+        }
+      }, resolve);
     });
-
-    return response;
   } catch (error) {
     console.error('Capture error:', error);
     return { error: error.message };
   }
 }
 
+// Listen for messages from popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log('Content script received message:', request);
   if (request.action === 'captureTweet') {
-    captureTweet(request.includeMetrics).then(sendResponse);
+    captureTweet(request.includeMetrics)
+      .then(sendResponse)
+      .catch(error => sendResponse({ error: error.message }));
     return true;
   }
 });
+
+console.log('Tweet Capture content script loaded!');
