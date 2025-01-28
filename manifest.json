@@ -2,18 +2,30 @@
   "manifest_version": 3,
   "name": "Tweet Capture",
   "version": "1.0",
-  "description": "Capture and format tweets as shareable images",
+  "description": "Capture tweets as images",
   "permissions": [
     "activeTab",
     "scripting",
     "downloads",
-    "tabs",
-    "clipboardWrite"
+    "clipboardWrite",
+    "tabs"
   ],
   "host_permissions": [
     "https://*.twitter.com/*",
     "https://*.x.com/*"
   ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.twitter.com/*",
+        "https://*.x.com/*"
+      ],
+      "js": ["scripts/contentScript.js"]
+    }
+  ],
+  "background": {
+    "service_worker": "scripts/background.js"
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
@@ -22,18 +34,9 @@
       "128": "icons/icon128.png"
     }
   },
-  "content_scripts": [
-    {
-      "matches": ["https://*.twitter.com/*", "https://*.x.com/*"],
-      "js": ["scripts/contentScript.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "background": {
-    "service_worker": "scripts/background.js",
-    "type": "module"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   }
 }
