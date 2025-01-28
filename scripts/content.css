@@ -1,0 +1,33 @@
+.tweet-capture-button {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1D9BF0;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 1000;
+}
+
+.tweet-capture-button img {
+  width: 14px;
+  height: 14px;
+}
+
+article:hover .tweet-capture-button {
+  opacity: 1;
+}
+
+.tweet-capture-button:hover {
+  background: #1A8CD8;
+  transform: translateY(-1px);
+} 
