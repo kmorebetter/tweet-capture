@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentImage = null;
   
+<<<<<<< HEAD
   async function downloadImage(dataUrl) {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `tweet-${timestamp}.png`;
@@ -125,6 +126,48 @@ document.addEventListener('DOMContentLoaded', () => {
       errorDiv.classList.remove('hidden');
     } finally {
       captureBtn.disabled = false;
+=======
+  captureBtn.addEventListener('click', async () => {
+    console.log('Capture button clicked');
+    
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      console.log('Current tab URL:', tab.url);
+      
+      if (!tab.url.includes('twitter.com') && !tab.url.includes('x.com')) {
+        console.log('Not on Twitter/X');
+        errorDiv.classList.remove('hidden');
+        preview.classList.add('hidden');
+        return;
+      }
+
+      // Try to capture the tweet
+      console.log('Sending capture request...');
+      const response = await chrome.tabs.sendMessage(tab.id, {
+        action: 'captureTweet',
+        includeMetrics: includeMetrics.checked
+      });
+      
+      console.log('Response received:', response);
+
+      if (response && response.error) {
+        throw new Error(response.error);
+      }
+
+      if (response && response.imageData) {
+        currentImage = response.imageData;
+        previewImage.src = currentImage;
+        preview.classList.remove('hidden');
+        errorDiv.classList.add('hidden');
+        copyBtn.disabled = false;
+      }
+
+    } catch (err) {
+      console.error('Error:', err);
+      errorDiv.textContent = err.message || 'Failed to capture tweet';
+      errorDiv.classList.remove('hidden');
+      preview.classList.add('hidden');
+>>>>>>> 5b68676fc5320332c1bfa229e83f0ba9c767f06e
     }
   });
 
@@ -135,6 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
       await navigator.clipboard.write([
         new ClipboardItem({ 'image/png': blob })
       ]);
+<<<<<<< HEAD
       errorDiv.textContent = 'Copied to clipboard!';
       errorDiv.style.color = '#00BA7C'; // Success color
       errorDiv.classList.remove('hidden');
@@ -146,3 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+=======
+    } catch (err) {
+      errorDiv.textContent = 'Failed to copy image';
+      errorDiv.classList.remove('hidden');
+    }
+  });
+});
+>>>>>>> 5b68676fc5320332c1bfa229e83f0ba9c767f06e

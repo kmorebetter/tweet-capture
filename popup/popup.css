@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 body {
   width: 300px;
   margin: 0;
@@ -93,11 +94,57 @@ button:disabled {
   padding: 8px;
   background-color: #FFEEF2;
   border-radius: 4px;
+=======
+.container {
+  width: 300px;
+  padding: 16px;
+}
+
+.options {
+  margin: 16px 0;
+}
+
+.buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
+  background: #1da1f2;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.preview {
+  margin-top: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.preview img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.error {
+  color: red;
+  padding: 8px;
+>>>>>>> 5b68676fc5320332c1bfa229e83f0ba9c767f06e
 }
 
 .hidden {
   display: none;
 }
+<<<<<<< HEAD
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
@@ -118,3 +165,5 @@ button:disabled {
     background-color: #1A8CD8;
   }
 }
+=======
+>>>>>>> 5b68676fc5320332c1bfa229e83f0ba9c767f06e
