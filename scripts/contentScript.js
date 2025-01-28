@@ -30,16 +30,20 @@ async function cropImage(dataUrl, area) {
 async function captureTweet(includeMetrics = true) {
   console.log('Starting tweet capture...');
   try {
-    // Try to find the main tweet container
-    const mainContent = document.querySelector('main[role="main"]');
-    if (!mainContent) {
-      throw new Error('Could not find main content area');
+    // First find the main content section that excludes the sidebar
+    const mainSection = document.querySelector('div[data-testid="primaryColumn"]') ||
+                       document.querySelector('main[role="main"] > div > div');
+    
+    if (!mainSection) {
+      throw new Error('Could not find main content section');
     }
 
-    // Try different selectors for tweets
-    const tweetArticle = mainContent.querySelector('[data-testid="tweet"]') || 
-                        mainContent.querySelector('[data-testid="tweetDetail"]') ||
-                        mainContent.querySelector('article');
+    console.log('Found main section:', mainSection);
+
+    // Try different selectors for tweets within the main section
+    const tweetArticle = mainSection.querySelector('article[data-testid="tweet"]') || 
+                        mainSection.querySelector('article[data-testid="tweetDetail"]') ||
+                        mainSection.querySelector('article');
                         
     console.log('Tweet element found:', !!tweetArticle);
 
@@ -53,27 +57,26 @@ async function captureTweet(includeMetrics = true) {
                          tweetArticle;
 
     // Add padding to ensure we capture the full tweet
-    const padding = 20;
+    const padding = 24; // Increased padding for safety
     
-    // Get the tweet's position and dimensions
-    const rect = tweetContainer.getBoundingClientRect();
-    console.log('Tweet dimensions:', rect);
-
     // Ensure the tweet is in view
     tweetContainer.scrollIntoView({ behavior: 'instant', block: 'center' });
     
     // Wait for any animations and layout adjustments
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Get updated position after scrolling
-    const updatedRect = tweetContainer.getBoundingClientRect();
+    // Get the tweet's dimensions from its container
+    const containerRect = tweetContainer.getBoundingClientRect();
+    
+    // Get the main section's left position to calculate the correct x-offset
+    const mainSectionRect = mainSection.getBoundingClientRect();
     
     // Calculate the capture area with padding
     const area = {
-      x: Math.max(0, Math.round(updatedRect.left - padding)),
-      y: Math.max(0, Math.round(updatedRect.top - padding)),
-      width: Math.round(updatedRect.width + (padding * 2)),
-      height: Math.round(updatedRect.height + (padding * 2))
+      x: Math.max(0, Math.round(mainSectionRect.left - padding)),
+      y: Math.max(0, Math.round(containerRect.top - padding)),
+      width: Math.round(mainSectionRect.width + (padding * 2)),
+      height: Math.round(containerRect.height + (padding * 2))
     };
     
     console.log('Capture area:', area);
@@ -111,6 +114,11 @@ async function captureTweet(includeMetrics = true) {
 // Listen for messages
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Content script received message:', request);
+  
+  if (request.action === 'ping') {
+    sendResponse({ status: 'ok' });
+    return;
+  }
   
   if (request.action === 'captureTweet') {
     captureTweet(request.includeMetrics)
